@@ -28,3 +28,4 @@ INFO:     127.0.0.1:53922 - "POST /api/v1/faces/quality HTTP/1.1" 200 OK
 INFO:     127.0.0.1:36012 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58932 - "GET / HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58932 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:41656 - "GET /health HTTP/1.1" 200 OK
