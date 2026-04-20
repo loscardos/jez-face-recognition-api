@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.DS_Store
+*.db
+*.sqlite
+face_data/
+logs/

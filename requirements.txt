@@ -1,0 +1,33 @@
+# Face Recognition API - DeepFace Implementation
+# Python 3.8+ required
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# DeepFace and Dependencies
+deepface>=0.0.89
+retina-face>=0.0.13
+
+# TensorFlow (untuk DeepFace backend)
+tensorflow>=2.13.0
+keras>=3.0.0
+tf-keras
+
+# Computer Vision
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+pydantic>=2.5.0
+
+# Optional: untuk performa lebih baik
+# install onnxruntime jika ingin inference lebih cepat
+# onnxruntime>=1.16.0

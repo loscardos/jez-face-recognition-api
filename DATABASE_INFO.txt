@@ -1,0 +1,89 @@
+╔════════════════════════════════════════════════════════════╗
+║        FACE RECOGNITION SYSTEM - DATABASE CONFIG           ║
+╚════════════════════════════════════════════════════════════╝
+
+DATABASE INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Database    : jez_erp
+Host        : db (localhost)
+Port        : 3306
+User        : root
+
+TABLE INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Table Name  : users (configured in Laravel)
+Face Column : u_face (LONGTEXT)
+Format      : JSON containing face descriptors
+
+IMPORTANT NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ The Python backend uses Laravel API, not direct DB access
+✓ It automatically communicates via HTTP to Laravel endpoints
+✓ Table naming is handled by Laravel configuration
+✓ The u_face column stores JSON with face descriptors
+
+HOW IT WORKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Python Backend
+    ↓ (HTTP API Call)
+Laravel (jez_sistem)
+    ↓ (Eloquent ORM)
+MySQL Database (jez_erp)
+    ↓
+users table → u_face column (JSON)
+
+DATABASE SCHEMA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+u_face column stores JSON like:
+
+{
+  "mode": "registration",
+  "registered_at": "2024-04-03T10:30:00Z",
+  "samples": [
+    {
+      "id": "sample_1",
+      "descriptor": [0.1, -0.2, 0.15, ...],  // 128 floats
+      "timestamp": "2024-04-03T10:30:00Z"
+    },
+    ...
+  ]
+}
+
+VERIFY YOUR DATABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Check existing tables
+mysql -h db -u root -p jez_erp
+SHOW TABLES;
+
+# Check face column
+SHOW COLUMNS FROM users LIKE 'u_face';
+
+# Count registered faces
+SELECT COUNT(*) 
+FROM users 
+WHERE u_face IS NOT NULL;
+
+# See sample face data
+SELECT id, u_name, 
+       JSON_EXTRACT(u_face, '$.registered_at') as registered_at,
+       JSON_LENGTH(u_face, '$.samples') as samples_count
+FROM users 
+WHERE u_face IS NOT NULL;
+
+DO NOT CHANGE TABLE NAME or COLUMN NAME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The system expects:
+  • Table: "users" (per Laravel User model)
+  • Column: "u_face" (for face descriptors)
+  • Database: "jez_erp" (production database)
+
+Changing these will break the system.
+
+For more details, see DATABASE_CONFIG.md
