@@ -54,10 +54,50 @@ def test_model_info_accepts_valid_internal_token():
     assert "backend" in response.json()
 
 
-def test_reload_cache_accepts_valid_internal_token(monkeypatch):
+def test_status_includes_cache_fingerprint(monkeypatch):
     from jez_face_api.routes import faces
 
+    faces.face_template_cache.reload_from_users_face_data({101: {"samples": [[1.0, 0.0, 0.0]]}})
+    client = TestClient(create_app())
+
+    response = client.get(
+        "/api/v1/faces/status",
+        headers={"X-Internal-Token": settings.INTERNAL_API_TOKEN},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["cached_templates"] == 1
+    assert response.json()["cache_fingerprint"]
+
+
+def test_reload_cache_rejects_empty_laravel_sync_without_clearing_existing_cache(monkeypatch):
+    from jez_face_api.routes import faces
+
+    faces.face_template_cache.reload_from_users_face_data({101: {"samples": [[1.0, 0.0, 0.0]]}})
     monkeypatch.setattr(faces.laravel_sync, "get_users_face_data", lambda: {})
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/api/v1/faces/reload-cache",
+        headers={"X-Internal-Token": settings.INTERNAL_API_TOKEN},
+    )
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Laravel face data sync returned no templates; existing cache preserved."
+    snapshot = faces.face_template_cache.snapshot()
+    assert snapshot.matrix.shape == (1, 3)
+    assert snapshot.user_ids == [101]
+
+
+def test_reload_cache_accepts_non_empty_laravel_sync(monkeypatch):
+    from jez_face_api.routes import faces
+
+    faces.face_template_cache.reload_from_users_face_data({})
+    monkeypatch.setattr(
+        faces.laravel_sync,
+        "get_users_face_data",
+        lambda: {202: {"samples": [[0.0, 1.0, 0.0], [0.0, 0.9, 0.1]]}},
+    )
     client = TestClient(create_app())
 
     response = client.post(
@@ -67,6 +107,7 @@ def test_reload_cache_accepts_valid_internal_token(monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["status"] == "success"
+    assert response.json()["templates"] == 2
 
 
 def test_identify_accepts_multipart_image_and_rejects_json(monkeypatch):

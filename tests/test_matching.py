@@ -95,3 +95,16 @@ def test_template_cache_builds_matrix_from_laravel_samples():
 
     assert snapshot.matrix.shape == (3, 3)
     assert snapshot.user_ids == [101, 101, 202]
+
+
+def test_template_cache_fingerprint_changes_when_content_changes_with_same_count():
+    cache = FaceTemplateCache()
+    cache.reload_from_users_face_data({101: {"samples": [[1.0, 0.0], [0.9, 0.1]]}})
+    first = cache.snapshot().fingerprint
+
+    cache.reload_from_users_face_data({101: {"samples": [[0.0, 1.0], [0.1, 0.9]]}})
+    second = cache.snapshot().fingerprint
+
+    assert first
+    assert second
+    assert first != second
