@@ -157,7 +157,7 @@ def identify_face(
     image: Annotated[UploadFile, File()],
     location: Annotated[str | None, Form()] = None,
     metadata: Annotated[str | None, Form()] = None,
-    include_user_details: Annotated[bool, Form()] = False,
+    include_user_details: Annotated[bool, Form()] = True,
 ) -> dict:
     _ = location, metadata
     start_time = time.time()

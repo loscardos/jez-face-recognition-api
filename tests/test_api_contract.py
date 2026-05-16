@@ -146,6 +146,7 @@ def test_identify_accepts_multipart_image_and_rejects_json(monkeypatch):
     assert json_response.status_code == 422
     assert multipart_response.status_code == 200
     assert multipart_response.json()["status"] == "success"
+    assert multipart_response.json()["data"]["user"]["name"] == "Tester"
     assert fake_backend.images == [b"fake-image-bytes"]
 
 
