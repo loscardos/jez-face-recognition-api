@@ -1,6 +1,11 @@
 FROM python:3.10-slim
 
-# Install system dependencies for face recognition
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/src
+
+WORKDIR /app
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -12,21 +17,13 @@ RUN apt-get update && apt-get install -y \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
-
-# Copy requirements first for better caching
-COPY requirements.txt .
-
-# Install Python dependencies
+COPY requirements.txt pyproject.toml ./
 RUN pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+COPY src ./src
+COPY main.py ./
 
-# Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["python", "main.py"]
+CMD ["python", "-m", "uvicorn", "jez_face_api.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]

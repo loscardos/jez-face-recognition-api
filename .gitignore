@@ -8,3 +8,4 @@ __pycache__/
 *.sqlite
 face_data/
 logs/
+.idea/

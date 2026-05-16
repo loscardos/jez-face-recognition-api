@@ -1,0 +1,15 @@
+[project]
+name = "jez-face-recognition-api"
+version = "0.1.0"
+description = "Private FastAPI face identity service for JEZ attendance"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
