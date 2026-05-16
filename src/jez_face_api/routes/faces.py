@@ -80,6 +80,7 @@ def status() -> dict:
         "model": model_info().get("model_name", "unknown"),
         "backend": model_info().get("backend", settings.FACE_BACKEND),
         "cached_templates": len(snapshot.user_ids),
+        "cache_fingerprint": snapshot.fingerprint,
         "face_threshold": settings.FACE_AUTO_MATCH_THRESHOLD,
     }
 
@@ -87,6 +88,13 @@ def status() -> dict:
 @router.post("/reload-cache")
 def reload_cache() -> dict:
     users_face_data = laravel_sync.get_users_face_data()
+    template_count = sum(len(payload.get("samples", [])) for payload in users_face_data.values())
+    if template_count == 0:
+        raise HTTPException(
+            status_code=503,
+            detail="Laravel face data sync returned no templates; existing cache preserved.",
+        )
+
     face_template_cache.reload_from_users_face_data(users_face_data)
     return {
         "status": "success",

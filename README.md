@@ -41,6 +41,7 @@ X-Internal-Token: change-this-in-production
 - `docs/architecture.md`
 - `docs/api.md`
 - `docs/operations.md`
+- `docs/production-runbook.md`
 - `docs/improvements.md`
 - `docs/migration-insightface.md`
 - `docs/archive/`

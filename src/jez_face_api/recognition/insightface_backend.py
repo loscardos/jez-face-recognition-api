@@ -1,4 +1,6 @@
 import logging
+import shutil
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -16,7 +18,12 @@ class InsightFaceBackend:
         self.model_pack = settings.INSIGHTFACE_MODEL_PACK
         self.det_size = settings.INSIGHTFACE_DET_SIZE
         self.provider = settings.INSIGHTFACE_PROVIDER
-        self.app = FaceAnalysis(name=self.model_pack, providers=[self.provider])
+        try:
+            self.app = FaceAnalysis(name=self.model_pack, providers=[self.provider])
+        except AssertionError:
+            if not self._flatten_nested_model_pack():
+                raise
+            self.app = FaceAnalysis(name=self.model_pack, providers=[self.provider])
         self.app.prepare(ctx_id=-1, det_size=(self.det_size, self.det_size))
 
     def extract_embedding(self, image_bytes: bytes) -> FaceEmbedding | None:
@@ -55,6 +62,28 @@ class InsightFaceBackend:
             "provider": self.provider,
             "loaded": True,
         }
+
+    def _flatten_nested_model_pack(self) -> bool:
+        model_dir = Path.home() / ".insightface" / "models" / self.model_pack
+        nested_dir = model_dir / self.model_pack
+        if not nested_dir.is_dir():
+            return False
+
+        onnx_files = list(nested_dir.glob("*.onnx"))
+        if not onnx_files:
+            return False
+
+        logger.warning("Flattening nested InsightFace model directory: %s", nested_dir)
+        model_dir.mkdir(parents=True, exist_ok=True)
+        for source in onnx_files:
+            target = model_dir / source.name
+            if not target.exists():
+                shutil.move(str(source), str(target))
+        try:
+            nested_dir.rmdir()
+        except OSError:
+            pass
+        return True
 
     @staticmethod
     def _decode_image(image_bytes: bytes) -> np.ndarray | None:
